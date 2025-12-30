@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { TopBar } from "@/components/layout/TopBar";
-import { FeaturedHero } from "@/components/home/FeaturedHero";
-import { NearbyGrid } from "@/components/home/NearbyGrid";
+import { FeaturedCarousel } from "@/components/home/FeaturedCarousel";
+import { NearbyFeed } from "@/components/home/NearbyFeed";
 import { ExploreCard } from "@/components/explore/ExploreCard";
 import { SearchPage } from "@/components/search/SearchPage";
 import { EntityDetailPage } from "@/components/detail/EntityDetailPage";
@@ -102,17 +102,10 @@ const Index = () => {
       case "home":
       default:
         return (
-          <div className="pb-24">
+          <div className="pb-24 overflow-y-auto no-scrollbar">
             <TopBar onSearchClick={handleSearchClick} />
-            <FeaturedHero
-              image="https://images.unsplash.com/photo-1548013146-72479768bada?w=1200"
-              categories={["Natural", "Waterfall"]}
-              title="Chitrakote Falls"
-              location="Bastar, Chhattisgarh"
-              description="Often called the Niagara of India, this horseshoe-shaped waterfall is the widest in India."
-              onExplore={handleCardClick}
-            />
-            <NearbyGrid onItemClick={handleCardClick} onViewAll={handleSearchClick} />
+            <FeaturedCarousel onExplore={handleCardClick} />
+            <NearbyFeed onItemClick={handleCardClick} onViewAll={handleSearchClick} />
           </div>
         );
     }
