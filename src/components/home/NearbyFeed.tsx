@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 
 interface NearbyItem {
@@ -26,7 +27,7 @@ const nearbyItems: NearbyItem[] = [
     id: "2",
     image: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=800",
     rating: 4.5,
-    category: "Nature Park",
+    category: "Nature",
     title: "Kanger Valley National Park",
     location: "Jagdalpur, Chhattisgarh",
     distance: "12 km",
@@ -36,7 +37,7 @@ const nearbyItems: NearbyItem[] = [
     id: "3",
     image: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800",
     rating: 4.2,
-    category: "Food Court",
+    category: "Food",
     title: "Tribal Kitchen",
     location: "Jagdalpur Market, Chhattisgarh",
     distance: "0.8 km",
@@ -56,7 +57,7 @@ const nearbyItems: NearbyItem[] = [
     id: "5",
     image: "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=800",
     rating: 4.9,
-    category: "Waterfall",
+    category: "Nature",
     title: "Tirathgarh Falls",
     location: "Jagdalpur, Chhattisgarh",
     distance: "8 km",
@@ -66,7 +67,7 @@ const nearbyItems: NearbyItem[] = [
     id: "6",
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800",
     rating: 4.4,
-    category: "Cave",
+    category: "Nature",
     title: "Kutumsar Cave",
     location: "Kanger Valley, Chhattisgarh",
     distance: "15 km",
@@ -74,24 +75,53 @@ const nearbyItems: NearbyItem[] = [
   },
   {
     id: "7",
-    image: "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=800",
+    image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800",
     rating: 4.3,
-    category: "Market",
-    title: "Bastar Haat",
+    category: "Food",
+    title: "Bastar Haat Dhaba",
     location: "Jagdalpur, Chhattisgarh",
     distance: "1.5 km",
-    description: "Weekly tribal market showcasing handmade crafts, Dhokra art, and traditional Bastar goods.",
+    description: "Traditional roadside eatery serving authentic Chhattisgarhi thalis and regional specialties.",
   },
   {
     id: "8",
     image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=800",
     rating: 4.7,
-    category: "Palace",
+    category: "Heritage",
     title: "Bastar Palace",
     location: "Jagdalpur, Chhattisgarh",
     distance: "2.8 km",
     description: "Historic royal palace of Bastar kings, now a heritage site with stunning architecture.",
   },
+  {
+    id: "9",
+    image: "https://images.unsplash.com/photo-1548013146-72479768bada?w=800",
+    rating: 4.5,
+    category: "Temple",
+    title: "Mama Bhanja Temple",
+    location: "Barsur, Chhattisgarh",
+    distance: "18 km",
+    description: "11th century twin temples with remarkable stone carvings and rich mythological history.",
+  },
+  {
+    id: "10",
+    image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800",
+    rating: 4.1,
+    category: "Museum",
+    title: "Tribal Art Gallery",
+    location: "Jagdalpur, Chhattisgarh",
+    distance: "2.1 km",
+    description: "Exhibits stunning Dhokra metal crafts, terracotta, and traditional Bastar art forms.",
+  },
+];
+
+const categories = [
+  { id: "all", label: "All", icon: "category" },
+  { id: "Temple", label: "Temple", icon: "temple_hindu" },
+  { id: "Nature", label: "Nature", icon: "forest" },
+  { id: "Food", label: "Food", icon: "restaurant" },
+  { id: "Museum", label: "Museum", icon: "museum" },
+  { id: "Heritage", label: "Heritage", icon: "account_balance" },
 ];
 
 interface NearbyFeedProps {
@@ -100,6 +130,12 @@ interface NearbyFeedProps {
 }
 
 export const NearbyFeed = ({ onItemClick, onViewAll }: NearbyFeedProps) => {
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const filteredItems = activeCategory === "all" 
+    ? nearbyItems 
+    : nearbyItems.filter(item => item.category === activeCategory);
+
   return (
     <section className="px-5 pt-6 pb-4">
       <div className="flex items-center justify-between mb-4">
@@ -112,70 +148,95 @@ export const NearbyFeed = ({ onItemClick, onViewAll }: NearbyFeedProps) => {
         </button>
       </div>
 
-      <div className="flex flex-col gap-4">
-        {nearbyItems.map((item) => (
-          <div
-            key={item.id}
-            onClick={() => onItemClick(item.id)}
-            className="glass rounded-3xl overflow-hidden press cursor-pointer group"
+      {/* Category Filter Tabs */}
+      <div className="flex gap-2 mb-5 overflow-x-auto pb-2 scrollbar-hide">
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all press ${
+              activeCategory === cat.id
+                ? "bg-primary text-primary-foreground"
+                : "glass text-muted-foreground hover:text-foreground"
+            }`}
           >
-            <div className="relative">
-              <img
-                src={item.image}
-                alt={item.title}
-                className="w-full aspect-[15/16] object-cover transition-transform duration-500 group-hover:scale-105"
-              />
-              
-              {/* Top overlay with rating */}
-              <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
-                <div className="glass px-3 py-1.5 rounded-full flex items-center gap-1">
-                  <Icon name="star" size="sm" className="text-yellow-400" filled />
-                  <span className="text-sm font-bold">{item.rating}</span>
+            <Icon name={cat.icon} size="xs" />
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {filteredItems.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <Icon name="search_off" size="lg" className="mx-auto mb-2 opacity-50" />
+            <p>No places found in this category</p>
+          </div>
+        ) : (
+          filteredItems.map((item) => (
+            <div
+              key={item.id}
+              onClick={() => onItemClick(item.id)}
+              className="glass rounded-3xl overflow-hidden press cursor-pointer group"
+            >
+              <div className="relative">
+                <img
+                  src={item.image}
+                  alt={item.title}
+                  className="w-full aspect-[15/16] object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                
+                {/* Top overlay with rating */}
+                <div className="absolute top-4 left-4 right-4 flex justify-between items-start">
+                  <div className="glass px-3 py-1.5 rounded-full flex items-center gap-1">
+                    <Icon name="star" size="sm" className="text-yellow-400" filled />
+                    <span className="text-sm font-bold">{item.rating}</span>
+                  </div>
+                  <div className="glass px-3 py-1.5 rounded-full flex items-center gap-1">
+                    <Icon name="near_me" size="sm" className="text-primary" />
+                    <span className="text-sm font-medium">{item.distance}</span>
+                  </div>
                 </div>
-                <div className="glass px-3 py-1.5 rounded-full flex items-center gap-1">
-                  <Icon name="near_me" size="sm" className="text-primary" />
-                  <span className="text-sm font-medium">{item.distance}</span>
+
+                {/* Bottom content overlay */}
+                <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/95 via-black/70 to-transparent">
+                  {/* Category */}
+                  <span className="text-xs bg-primary/90 px-3 py-1 rounded-full font-bold uppercase tracking-wide text-primary-foreground inline-block mb-3">
+                    {item.category}
+                  </span>
+
+                  {/* Title */}
+                  <h3 className="text-xl font-extrabold leading-tight mb-2 text-foreground">
+                    {item.title}
+                  </h3>
+
+                  {/* Location */}
+                  <div className="flex items-center gap-1 text-muted-foreground mb-3">
+                    <Icon name="location_on" size="sm" />
+                    <span className="text-sm">{item.location}</span>
+                  </div>
+
+                  {/* Description */}
+                  <p className="text-sm text-muted-foreground line-clamp-2">
+                    {item.description}
+                  </p>
+
+                  {/* Action button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onItemClick(item.id);
+                    }}
+                    className="mt-4 bg-primary text-primary-foreground px-5 py-2 rounded-full font-bold text-sm press transition-all hover:bg-primary/90 flex items-center gap-2"
+                  >
+                    <Icon name="explore" size="sm" />
+                    Explore
+                  </button>
                 </div>
-              </div>
-
-              {/* Bottom content overlay */}
-              <div className="absolute bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-black/95 via-black/70 to-transparent">
-                {/* Category */}
-                <span className="text-xs bg-primary/90 px-3 py-1 rounded-full font-bold uppercase tracking-wide text-primary-foreground inline-block mb-3">
-                  {item.category}
-                </span>
-
-                {/* Title */}
-                <h3 className="text-xl font-extrabold leading-tight mb-2 text-foreground">
-                  {item.title}
-                </h3>
-
-                {/* Location */}
-                <div className="flex items-center gap-1 text-muted-foreground mb-3">
-                  <Icon name="location_on" size="sm" />
-                  <span className="text-sm">{item.location}</span>
-                </div>
-
-                {/* Description */}
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {item.description}
-                </p>
-
-                {/* Action button */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onItemClick(item.id);
-                  }}
-                  className="mt-4 bg-primary text-primary-foreground px-5 py-2 rounded-full font-bold text-sm press transition-all hover:bg-primary/90 flex items-center gap-2"
-                >
-                  <Icon name="explore" size="sm" />
-                  Explore
-                </button>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </section>
   );
