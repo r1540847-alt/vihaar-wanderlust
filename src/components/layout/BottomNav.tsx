@@ -16,6 +16,7 @@ interface BottomNavProps {
 const navItems: NavItem[] = [
   { id: "home", label: "Home", icon: "home" },
   { id: "explore", label: "Explore", icon: "explore" },
+  { id: "saved", label: "Saved", icon: "favorite" },
   { id: "profile", label: "Profile", icon: "person", badge: true },
 ];
 
