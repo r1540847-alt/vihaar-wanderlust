@@ -123,7 +123,7 @@ export const NearbyFeed = ({ onItemClick, onViewAll }: NearbyFeedProps) => {
               <img
                 src={item.image}
                 alt={item.title}
-                className="w-full aspect-[9/16] object-cover transition-transform duration-500 group-hover:scale-105"
+                className="w-full aspect-[15/16] object-cover transition-transform duration-500 group-hover:scale-105"
               />
               
               {/* Top overlay with rating */}
