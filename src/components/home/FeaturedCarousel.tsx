@@ -59,20 +59,30 @@ interface FeaturedCarouselProps {
 
 export const FeaturedCarousel = ({ onExplore }: FeaturedCarouselProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
+  const startX = useRef(0);
+  const currentX = useRef(0);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
+  const handleStart = (clientX: number) => {
+    setIsDragging(true);
+    startX.current = clientX;
+    currentX.current = clientX;
   };
 
-  const handleTouchMove = (e: React.TouchEvent) => {
-    touchEndX.current = e.touches[0].clientX;
+  const handleMove = (clientX: number) => {
+    if (!isDragging) return;
+    currentX.current = clientX;
+    const diff = currentX.current - startX.current;
+    setDragOffset(diff);
   };
 
-  const handleTouchEnd = () => {
-    const diff = touchStartX.current - touchEndX.current;
+  const handleEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const diff = startX.current - currentX.current;
     const threshold = 50;
 
     if (diff > threshold && currentIndex < featuredItems.length - 1) {
@@ -80,9 +90,28 @@ export const FeaturedCarousel = ({ onExplore }: FeaturedCarouselProps) => {
     } else if (diff < -threshold && currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
     }
+    
+    setDragOffset(0);
   };
 
-  const currentItem = featuredItems[currentIndex];
+  // Touch events
+  const handleTouchStart = (e: React.TouchEvent) => handleStart(e.touches[0].clientX);
+  const handleTouchMove = (e: React.TouchEvent) => handleMove(e.touches[0].clientX);
+  const handleTouchEnd = () => handleEnd();
+
+  // Mouse events for desktop
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleStart(e.clientX);
+  };
+  const handleMouseMove = (e: React.MouseEvent) => handleMove(e.clientX);
+  const handleMouseUp = () => handleEnd();
+  const handleMouseLeave = () => {
+    if (isDragging) handleEnd();
+  };
+
+  const containerWidth = containerRef.current?.offsetWidth || 0;
+  const translateX = -currentIndex * 100 + (containerWidth > 0 ? (dragOffset / containerWidth) * 100 : 0);
 
   return (
     <section className="px-5 pt-4">
@@ -105,14 +134,18 @@ export const FeaturedCarousel = ({ onExplore }: FeaturedCarouselProps) => {
 
       <div
         ref={containerRef}
-        className="relative rounded-3xl overflow-hidden cursor-grab active:cursor-grabbing"
+        className="relative rounded-3xl overflow-hidden cursor-grab active:cursor-grabbing select-none"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
       >
         <div
-          className="flex transition-transform duration-500 ease-out"
-          style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+          className={`flex ${isDragging ? '' : 'transition-transform duration-500 ease-out'}`}
+          style={{ transform: `translateX(${translateX}%)` }}
         >
           {featuredItems.map((item) => (
             <div key={item.id} className="w-full flex-shrink-0">
@@ -120,7 +153,8 @@ export const FeaturedCarousel = ({ onExplore }: FeaturedCarouselProps) => {
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="w-full aspect-[4/3] object-cover"
+                  className="w-full aspect-[4/3] object-cover pointer-events-none"
+                  draggable={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
@@ -167,7 +201,7 @@ export const FeaturedCarousel = ({ onExplore }: FeaturedCarouselProps) => {
         </div>
 
         {/* Swipe hint */}
-        <div className="absolute top-4 right-4 glass px-3 py-1.5 rounded-full flex items-center gap-1">
+        <div className="absolute top-4 right-4 glass px-3 py-1.5 rounded-full flex items-center gap-1 animate-pulse">
           <Icon name="swipe" size="sm" className="text-muted-foreground" />
           <span className="text-xs text-muted-foreground">Swipe</span>
         </div>
